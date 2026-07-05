@@ -1,6 +1,6 @@
+# Propagação do modo TE10 em guia de onda retangular
 from pathlib import Path
 import matplotlib.pyplot as plt
-
 from SimulacaoFDTD import SimulacaoFDTD
 
 Path("resultados").mkdir(exist_ok=True)
@@ -20,30 +20,24 @@ frames = sim.main_loop(
     n_passos=2500,
     capturar_em=[2499]
 )
-
 Ey = frames[2499]
 
-plt.figure(figsize=(10,4))
-
+plt.figure(figsize=(10, 4))
 plt.imshow(
-    Ey.T,
+    Ey,
     origin="lower",
     cmap="RdBu",
     aspect="auto",
-    extent=[0, sim.L_guia, 0, sim.Nx*sim.dx]
+    extent=[0, sim.z[-1], 0, sim.x[-1]]
 )
-
 plt.colorbar(label="Ey")
 plt.xlabel("z (m)")
 plt.ylabel("x (m)")
 plt.title("Modo TE10 propagando no guia")
-
 plt.tight_layout()
-
 plt.savefig(
     "resultados/simulacao1_prop_guia.png",
     dpi=300,
     bbox_inches="tight"
 )
-
 plt.close()

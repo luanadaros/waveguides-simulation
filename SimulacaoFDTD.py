@@ -177,7 +177,7 @@ class SimulacaoFDTD:
             fig, ax = plt.subplots(figsize=(10,5))
 
             im = ax.imshow(
-                Ey.T,
+                Ey,
                 origin="lower",
                 aspect="auto",
                 cmap="RdBu",

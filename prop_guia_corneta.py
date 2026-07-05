@@ -1,3 +1,4 @@
+# Propagação do modo TE10 em guia de onda numa corneta
 from pathlib import Path
 import matplotlib.pyplot as plt
 
@@ -26,7 +27,7 @@ Ey = frames[3999]
 plt.figure(figsize=(12,5))
 
 plt.imshow(
-    Ey.T,
+    Ey,
     origin="lower",
     cmap="RdBu",
     aspect="auto",
