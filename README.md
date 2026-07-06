@@ -1,9 +1,6 @@
 # Relatório — Simulação Computacional FDTD 2D de Guia de Onda e Antena Corneta
 
-Este README documenta o que compõe o relatório exigido na **Seção 6** do enunciado
-(*Trabalho Prático: Simulação Computacional de Guias de Onda e Antenas Corneta*),
-descrevendo os quatro itens obrigatórios e como cada um é atendido pelos scripts
-deste projeto.
+Este README documenta o que compõe o relatório exigido para avaliação do *Trabalho Prático: Simulação Computacional de Guias de Onda e Antenas Corneta*, na disciplina de Eletromagnetismo II, da Universidade Federal do Espírito Santo.
 
 ## Sumário
 
@@ -17,17 +14,41 @@ deste projeto.
 
 ---
 
-## 1. Apresentação Visual
-
-**Exigência do enunciado:** mapas de calor (amplitude de `Ey`) no guia, na corneta e no espaço livre.
+## 1. Apresentação Visual dos Resultados
 
 Gerados por `main.py`, que produz três figuras estáticas em `output/`:
 
-| Arquivo | Conteúdo |
-|---|---|
-| `1_campo_no_guia.png` | Campo `Ey` capturado quando a frente de onda ainda está dentro da seção reta do guia |
-| `2_campo_na_corneta.png` | Campo capturado durante a transição, com a onda já dentro da corneta |
-| `3_campo_espaco_livre.png` | Campo em regime já estabelecido, com irradiação visível no espaço livre |
+### Campo no guia
+
+![Campo Ey no guia](output/1_campo_no_guia.png)
+
+Este frame captura a onda **ainda confinada na seção reta do guia**, antes de atingir a
+transição para a corneta. Nele fica evidente o padrão transversal do modo TE10: campo
+nulo junto às paredes metálicas (condição PEC, `Ey = 0`) e máximo no centro do guia,
+seguindo o perfil `sin(πx/a)`. As frentes de fase constante são aproximadamente **retas
+e perpendiculares a z** — ou seja, a onda se comporta como uma **frente de onda plana**
+guiada, sem ainda "sentir" a presença da corneta.
+
+### Campo na corneta
+
+![Campo Ey na corneta](output/2_campo_na_corneta.png)
+
+Aqui a onda já penetrou na região onde as paredes se abrem progressivamente. Como o
+campo continua vinculado às paredes metálicas (que agora divergem), as frentes de fase
+constante deixam de ser retas e passam a se **curvar**, acompanhando a abertura da
+corneta. Essa curvatura crescente é a assinatura visual da transição de uma onda guiada
+(plana) para uma onda que começa a se comportar como radiada (cilíndrica/esférica).
+
+### Campo no espaço livre
+
+![Campo Ey no espaço livre](output/3_campo_espaco_livre.png)
+
+Neste instante o regime já está estabelecido e a irradiação no espaço livre é
+claramente visível: as frentes de onda aparecem como **arcos concêntricos**,
+característicos de uma frente **cilíndrica** (equivalente 2D da frente esférica de uma
+antena real em 3D). Essa é a região em que a energia efetivamente se desprende da
+estrutura guiada e se propaga livremente, evidenciando o papel da corneta como
+transdutor de casamento de impedância entre o guia e o espaço livre.
 
 **Detalhe importante de implementação:** os três instantes de tempo (`n_guia`,
 `n_transicao`, `n_livre`) **não são escolhidos arbitrariamente** — são calculados a
@@ -42,19 +63,9 @@ em vez da velocidade da luz `c`. Isso é essencial porque, dentro do guia, a ene
 se propaga a `vg ≈ 66%` de `c` para os parâmetros usados aqui — se o tempo de trânsito
 for estimado com `c`, os frames escolhidos ficam adiantados demais e mostram o campo
 já em regime estabelecido em todos os três "estágios", em vez de capturar de fato o
-guia, a transição e o espaço livre separadamente. O cálculo também soma o tempo de
-rampa de acionamento da fonte (~3 períodos) e considera a posição real da fonte
-(que não fica em `z=0`).
+guia, a transição e o espaço livre separadamente.
 
 ## 2. Análise de Transição
-
-**Exigência do enunciado:** explicar a mudança da frente de onda (plana → cilíndrica)
-e sua relação com o casamento de impedância promovido pela corneta.
-
-Esta parte é **textual**, redigida com base na comparação visual entre as três figuras
-acima (e opcionalmente `simulacao4_comparacao.png`, que compara lado a lado um guia
-com terminação abrupta e um guia com corneta). Pontos a desenvolver no texto do
-relatório:
 
 - Dentro do guia, a frente de onda é aproximadamente **plana**, com o perfil
   transversal senoidal do modo TE10 mantido constante ao longo de `z`.
@@ -64,81 +75,54 @@ relatório:
 - Essa transição gradual — em vez de uma abertura abrupta — funciona como um
   **casamento de impedância**: reduz reflexões na transição guia→espaço livre,
   permitindo que mais energia seja efetivamente irradiada em vez de refletida de
-  volta para o guia. A comparação entre `1_campo_no_guia`/`simulacao1` (terminação
-  abrupta) e `simulacao2`/`2_campo_na_corneta` (transição suave) evidencia esse
+  volta para o guia. A comparação entre a simulação 1 (saída do campo no guia sem corneta) e simulação 2 (saída do campo no guia + corneta) evidencia esse
   efeito.
-- Pode-se citar a impedância característica do modo TE10 no guia,
-  `Zte = η₀ / √(1 − (fc10/f0)²)` (onde `η₀ ≈ 377 Ω`), que difere da impedância do
-  espaço livre; a corneta faz essa impedância variar suavemente entre os dois
-  valores ao longo do seu comprimento.
+
+![Comparação de Transição](resultados/simulacao4_comparacao.png)
 
 ## 3. Estudo de Caso — Modo Evanescente
 
-**Exigência do enunciado:** simular com `f < fc10` e demonstrar visualmente e
-matematicamente o decaimento exponencial sem propagação.
+Gerado por `prop_modo_evanescente.py`, com `f0 = 5 GHz < fc10 = 7,5 GHz`
+(`a = 0,02 m`). O gráfico foi plotado em escala logarítmica ao invés de HeatMap para melhor visualização do campo `|Ey(z)|`. Obtemos como resultado:
 
-Gerado por `simulacao_evanescente.py`, com `f0 = 5 GHz < fc10 = 7,5 GHz`
-(`a = 0,02 m`), guia reto sem corneta (`usar_corneta=False`). Saída:
-`simulacao3_prop_evanescente.png`.
-
-**Metodologia:** em vez de capturar `|Ey(z)|` num único instante de tempo arbitrário
-(o que produz uma curva "ruidosa" com ondulações de fase), o script:
-
-1. deixa o regime se estabelecer (~3000 passos de "aquecimento");
-2. varre um período completo de oscilação, guardando o **envelope**
-   (`np.maximum` do módulo do campo) em cada posição `z`;
-3. plota o envelope em **escala logarítmica** (`plt.semilogy`).
+![Modo Evanescente](resultados/simulacao3_prop_evanescente.png)
 
 Numa onda evanescente pura, o log da amplitude decai **linearmente** com `z` — por
 isso a escala log é a evidência visual mais forte de decaimento exponencial
 (um trecho reto no gráfico log-linear).
 
-**Validação quantitativa** (não obrigatória, mas fortalece o relatório): medindo a
-inclinação do trecho reto e comparando com a constante de atenuação teórica
+A dedução matemática do modo evanescente é:
+
+1. Dentro do guia, o número de onda longitudinal do modo TE10 é calculado por:
+```
+kz = √[(ω/c₀)² − (π/a)²]
+```
+
+2. Quando a frequência da onda é menor que a frequência de corte (`f < fc10`), o termo dentro da raiz fica negativo, então `kz` é imaginário puro:
 
 ```
-α = (2π/c) · √(fc10² − f0²)
+kz = jα
+```
+```
+α = √[(π/a)² − (ω/c₀)²]     [1/m]
 ```
 
-o valor medido no FDTD (~103 Np/m) ficou em torno de **88% do valor teórico**
-(~117 Np/m), diferença esperada de dispersão numérica do método FDTD, especialmente
-próximo à frequência de corte. Após um certo `z`, o gráfico atinge um patamar de
-**ruído numérico de fundo** (não um artefato físico) — vale mencionar isso
-explicitamente no texto para deixar claro que não é um erro de implementação.
+3. Isso é o que transforma o campo de "onda viajante" em um campo estacionário que decai:
+
+```
+Ey(x,z,t) ∝ sin(πx/a) · e^(−αz) · sin(ωt)
+```
 
 ## 4. Código Fonte
-
-**Exigência do enunciado:** código Python organizado e comentado.
 
 | Arquivo | Função |
 |---|---|
 | `SimulacaoFDTD.py` | Classe com o núcleo do método FDTD 2D (grade de Yee, atualização de `Hx`/`Hz`/`Ey`, máscara PEC, fonte TE10, ABC de Mur 1ª ordem) |
 | `main.py` | Gera as 3 figuras principais (guia / corneta / espaço livre) com escolha física dos instantes de captura |
-| `simulacao_guia.py` | Caso isolado: propagação em guia reto sem corneta |
-| `simulacao_corneta.py` | Caso isolado: guia + corneta + espaço livre |
-| `simulacao_evanescente.py` | Estudo de caso do modo evanescente (`f0 < fc10`) |
-| `simulacao_comparacao.py` | Comparação lado a lado: terminação abrupta vs. corneta |
-
-## Estrutura do repositório
-
-```
-.
-├── SimulacaoFDTD.py
-├── main.py
-├── simulacao_guia.py
-├── simulacao_corneta.py
-├── simulacao_evanescente.py
-├── simulacao_comparacao.py
-├── output/
-│   ├── 1_campo_no_guia.png
-│   ├── 2_campo_na_corneta.png
-│   └── 3_campo_espaco_livre.png
-└── resultados/
-    ├── simulacao1_prop_guia.png
-    ├── simulacao2_prop_guia_corneta.png
-    ├── simulacao3_prop_evanescente.png
-    └── simulacao4_comparacao.png
-```
+| `prop_guia.py` | Caso isolado: propagação em guia reto sem corneta |
+| `prop_guia_corneta.py` | Caso isolado: guia + corneta + espaço livre |
+| `prop_modo_evanescente.py` | Estudo de caso do modo evanescente (`f0 < fc10`) |
+| `guia_x_corneta.py` | Comparação lado a lado: terminação abrupta vs. corneta |
 
 ## Como reproduzir os resultados
 
@@ -146,13 +130,13 @@ explicitamente no texto para deixar claro que não é um erro de implementação
 pip install numpy matplotlib imageio
 
 python main.py                     # figuras principais (Seção 6.1)
-python simulacao_guia.py           # caso isolado: guia reto
-python simulacao_corneta.py        # caso isolado: guia + corneta
-python simulacao_evanescente.py    # estudo do modo evanescente (Seção 6.3)
-python simulacao_comparacao.py     # comparação guia vs. corneta
+python prop_guia.py           # caso isolado: guia reto
+python prop_guia_corneta.py        # caso isolado: guia + corneta
+python prop_modo_evanescente.py    # estudo do modo evanescente (Seção 6.3)
+python guia_x_corneta.py     # comparação guia vs. corneta
 ```
 
-## Parâmetros físicos utilizados
+## Parâmetros físicos utilizados nas simulações
 
 | Parâmetro | Caso propagante (guia+corneta) | Caso evanescente |
 |---|---|---|
